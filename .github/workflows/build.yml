@@ -75,7 +75,7 @@ jobs:
           - version: 7.2
             platform: v1000
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout
@@ -200,7 +200,7 @@ jobs:
 
 
   firmware:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     steps:
       - name: Checkout
@@ -248,7 +248,7 @@ jobs:
 
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: firmware
     steps:
       - name: Checkout
