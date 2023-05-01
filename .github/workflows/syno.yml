@@ -12,7 +12,7 @@ on:
 
 jobs:
   official:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       TOOL_PATH: extractor
       OFFICIAL_PATH: official
