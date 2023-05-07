@@ -14,7 +14,7 @@
 #   - version: "7.2"
 #     platform: "broadwell"
 
-name: Build modules
+name: Zip modules
 
 on:  
   workflow_dispatch:
