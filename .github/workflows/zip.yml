@@ -169,13 +169,10 @@ jobs:
 
       - name: firmware
         run: |
-          mkdir -p firmware
-
-          echo "copy 3rd modules"
+          echo "pack firmware"
           PARTY3RD_PATH="${{ github.workspace }}/firmware"
-          cp -rf ${PARTY3RD_PATH}/* firmware/
 
-          tar caf firmware.tgz -C firmware .
+          tar caf firmware.tgz -C ${PARTY3RD_PATH} .
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
