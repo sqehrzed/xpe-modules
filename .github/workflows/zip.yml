@@ -4,13 +4,15 @@
 # This is free software, licensed under the MIT License.
 # See /LICENSE for more information.
 #
+name: Zip modules
 
-workflow_dispatch:
-  inputs:
-    version:
-      description: 'format %y.%-m.$i or auto'
-      required: false
-      type: string
+on:  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'format %y.%-m.$i or auto'
+        required: false
+        type: string
 
 jobs:
   zip:
