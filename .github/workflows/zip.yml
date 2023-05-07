@@ -1,0 +1,75 @@
+#
+# Copyright (C) 2023 AuxXxilium <https://github.com/AuxXxilium> and Ing <https://github.com/wjz304>
+# 
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+
+workflow_dispatch:
+  inputs:
+    version:
+      description: 'format %y.%-m.$i or auto'
+      required: false
+      type: string
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Init Env
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          sudo timedatectl set-timezone "Europe/Berlin" 
+
+      - name: Calculate version
+        run: |
+          # Calculate version
+          VERSION=""
+          if [ ${{ github.event_name }} == 'release' -a ${{ github.ref_type }} == 'tag' ]; then
+            VERSION="${{ github.ref_name }}"
+          elif [ -n "${{ inputs.version }}" ]; then
+            if [ "`echo ${{ inputs.version }} | cut -d '.' -f 1,2`" = "`date +'%y.%-m'`" ]; then
+              VERSION="${{ inputs.version }}"
+            else
+              LATEST_TAG="`curl -skL "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r ".[0].tag_name" 2>/dev/null`"
+              if [ -n "${LATEST_TAG}" -a "`echo ${LATEST_TAG} | cut -d '.' -f 1,2`" = "`date +'%y.%-m'`" ]; then  # format %y.%-m.$i
+                VERSION="`echo ${LATEST_TAG} | awk -F '.' '{$3=$3+1}1' OFS='.'`"
+              else
+                VERSION="`date +'%y.%-m'`.0"
+              fi
+            fi
+          else
+            VERSION=""
+          fi
+          echo "VERSION: ${VERSION}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Tar modules
+        run: |
+          for D in `ls -d *-*`; do
+            (cd ${D} && tar caf modules/${D}.tgz *.ko)
+          done
+          (cd firmware && tar caf modules/firmware.tgz *)
+
+        - name: Zip modules
+          if: env.VERSION != ''
+          run: |
+            echo "${{ env.VERSION }}" > "modules/VERSION"
+            zip -9 modules.zip -j modules/*
+  
+        - name: Release
+          uses: softprops/action-gh-release@v1
+          if: env.VERSION != ''
+          with:
+            tag_name: ${{ env.VERSION }}
+            files: modules.zip
+
+        - name: Release
+        uses: softprops/action-gh-release@v1
+        if: env.VERSION != ''
+        with:
+          tag_name: ${{ env.VERSION }}
+          files: modules.zip
