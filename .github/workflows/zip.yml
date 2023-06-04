@@ -141,6 +141,16 @@ jobs:
           echo "copy 3rd modules"
           [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
+          echo "check depends"
+          for M in `ls ${{ github.workspace }}/source/output`; do
+            depends=(`modinfo "${{ github.workspace }}/source/output/${M}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'`)
+            if [ ${#depends[*]} -gt 0 ]; then
+              for k in ${depends[@]}; do
+                [ ! -f "${{ github.workspace }}/source/output/${k}.ko" ] && echo "[W] '${{ matrix.platform }}-${{ env.KVER }}' - '${M}' depends '${k}' does not exist"
+              done
+            fi
+          done
+
           tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
 
       - name: Upload to Artifacts
