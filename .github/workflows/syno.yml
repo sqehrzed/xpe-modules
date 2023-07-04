@@ -39,7 +39,7 @@ jobs:
 
           OLDPAT_URL="https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat"
           OLDPAT_FILE="DSM_DS3622xs+_42218.pat"
-          STATUS=`curl -# -w "%{http_code}" -L "${OLDPAT_URL}" -o "${CACHE_DIR}/${OLDPAT_FILE}"`
+          STATUS=$(curl -# -w "%{http_code}" -L "${OLDPAT_URL}" -o "${CACHE_DIR}/${OLDPAT_FILE}")
           if [ $? -ne 0 -o ${STATUS} -ne 200 ]; then
             echo "[E] DSM_DS3622xs%2B_42218.pat download error!"
             rm -rf ${CACHE_DIR}
@@ -104,13 +104,13 @@ jobs:
             fi
 
             echo "extract ${filepath}/rd.gz"
-            rdpath=`realpath ${filepath}/rd.gz`
+            rdpath=$(realpath ${filepath}/rd.gz)
             rdpath=${rdpath%%\.*}
             mkdir -p "${rdpath}"
             (cd "${rdpath}"; xz -dc < "${rdpath}.gz" | cpio -idm) >/dev/null 2>&1 || true
             
-            plat="`grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/'`"
-            kver="`file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g'`"
+            plat="$(grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/')"
+            kver="$(file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g')"
             officialpath="${{ env.OFFICIAL_PATH }}/${plat}-${kver}"
 
             echo "copy ${plat}-${kver} modules"
@@ -141,7 +141,7 @@ jobs:
           getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS920%2B_42218.pat'  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
           #- version: 7.1 
           #  platform: purley
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_FS6400_42218.pat'
+          #getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_FS6400_42218.pat'
           #- version: 7.1
           #  platform: r1000
           getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.1.1/42962/DSM_DS923%2B_42962.pat'  # DS923%2B no have version 7.0.1
@@ -169,7 +169,7 @@ jobs:
           getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS920%2B_64551.pat'  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
           #- version: 7.2 
           #  platform: purley
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_FS6400_64551.pat'
+          #getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_FS6400_64551.pat'
           #- version: 7.2
           #  platform: r1000
           getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS923%2B_64551.pat'
