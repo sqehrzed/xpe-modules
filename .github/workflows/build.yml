@@ -88,6 +88,7 @@ jobs:
           sudo timedatectl set-timezone "Europe/Berlin" 
           
       - name: Get EnvDeploy
+        # if: ${{ steps.cache-env.outputs.cache-hit != 'true' }}
         run: |
           ROOT_PATH=${{ github.workspace }}
 
@@ -177,13 +178,26 @@ jobs:
           #OFFICIAL_PATH="${{ github.workspace }}/official/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
-          #echo "copy official modules"
-          #for M in $(ls ${{ github.workspace }}/source/output); do
-          #  [ -f ${OFFICIAL_PATH}/${M} ] && cp -f ${OFFICIAL_PATH}/${M} "${{ github.workspace }}/source/output"
-          #done
+          # echo "copy official modules"
+          # for M in $(ls ${{ github.workspace }}/source/output); do
+          #   [ -f ${OFFICIAL_PATH}/${M} ] && cp -n ${OFFICIAL_PATH}/${M} "${{ github.workspace }}/source/output"
+          # done
 
           echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          [ -d "${PARTY3RD_PATH}" ] && cp -rn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+
+          echo "check depends"
+          for M in $(ls ${{ github.workspace }}/source/output); do
+            depends=($(modinfo "${{ github.workspace }}/source/output/${M}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'))
+            if [ ${#depends[*]} -gt 0 ]; then
+              for k in ${depends[@]}; do
+                if [ ! -f "${{ github.workspace }}/source/output/${k}.ko" ]; then
+                  [ -f "${OFFICIAL_PATH}/${k}.ko" ] && FLAG=O || FLAG=X
+                  echo "[W][${FLAG}] '${{ matrix.platform }}-${{ env.KVER }}' - '${M}' depends '${k}' does not exist."
+                fi
+              done
+            fi
+          done
 
           tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
 
@@ -205,7 +219,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-        
+
       - name: download to artifacts
         uses: actions/download-artifact@v3
         with:
@@ -227,14 +241,13 @@ jobs:
           SOURCE=/tmp/linux-firmware
           git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git ${SOURCE}
           while read L; do
-            FN="${SOURCE}/${L}"
-            if [ -e "${FN}" ]; then
-              mkdir -p "$(dirname firmware/${L})"
-              cp "${FN}" "firmware/${L}"
+            if [ -e "${SOURCE}/${L}" ]; then
+              mkdir -p "`dirname firmware/${L}`"
+              cp "${SOURCE}/${L}" "firmware/${L}"
             else
-              echo "Missing ${FN}"
+              [ -e "firmware/${L}" ] && echo "Used thirdparty ${L}" || echo "Missing ${L}"
             fi
-          done < <(find ./modules -name \*.ko -exec sh -c '/sbin/modinfo {} | grep ^firmware' \; | awk '{print$2}')
+          done < <(find ./modules -name \*.ko -exec sh -c '/sbin/modinfo {} | grep ^firmware' \; | awk '{print $2}')
 
           tar caf firmware.tgz -C firmware .
 
@@ -261,12 +274,12 @@ jobs:
           if [ ${{ github.event_name }} == 'release' -a ${{ github.ref_type }} == 'tag' ]; then
             VERSION="${{ github.ref_name }}"
           elif [ -n "${{ inputs.version }}" ]; then
-            if [ "$(echo ${{ inputs.version }} | cut -d '.' -f 1,2)" = "$(date +'%y.%-m')" ]; then
+            if [ "`echo ${{ inputs.version }} | cut -d '.' -f 1,2`" = "`date +'%y.%-m'`" ]; then
               VERSION="${{ inputs.version }}"
             else
               LATEST_TAG="$(curl -skL "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r ".tag_name" 2>/dev/null)"
-              if [ -n "${LATEST_TAG}" -a "`echo ${LATEST_TAG} | cut -d '.' -f 1,2`" = "`date +'%y.%-m'`" ]; then  # format %y.%-m.$i
-                VERSION="`echo ${LATEST_TAG} | awk -F '.' '{$3=$3+1}1' OFS='.'`"
+              if [ -n "${LATEST_TAG}" -a "$(echo ${LATEST_TAG} | cut -d '.' -f 1,2)" = "$(date +'%y.%-m')" ]; then  # format %y.%-m.$i
+                VERSION="$(echo ${LATEST_TAG} | awk -F '.' '{$3=$3+1}1' OFS='.')"
               else
                 VERSION="$(date +'%y.%-m').0"
               fi
@@ -274,6 +287,7 @@ jobs:
           else
             VERSION=""
           fi
+
           echo "VERSION: ${VERSION}"
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
