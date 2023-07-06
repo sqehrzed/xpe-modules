@@ -175,9 +175,10 @@ jobs:
 
       - name: firmware
         run: |
-          echo "pack firmware"
-          PARTY3RD_PATH="${{ github.workspace }}/firmware"
-
+          echo "copy 3rd firmware"
+          PARTY3RD_PATH="${{ github.workspace }}/thirdparty/firmware"
+          cp -rf ${PARTY3RD_PATH}/* firmware/
+          
           echo "extract all modules"
           for F in ./modules/*.tgz; do mkdir "${F%.tgz}" && tar -xzf "${F}" -C "${F%.tgz}"; done
           
