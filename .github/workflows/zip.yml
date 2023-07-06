@@ -175,6 +175,8 @@ jobs:
 
       - name: firmware
         run: |
+          mkdir -p firmware
+          
           echo "copy 3rd firmware"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/firmware"
           cp -rf ${PARTY3RD_PATH}/* firmware/
