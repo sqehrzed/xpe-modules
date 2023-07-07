@@ -5,7 +5,7 @@
 # See /LICENSE for more information.
 #
 
-name: Get official modules
+name: Get official Modules
 
 on:   
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
 
           OLDPAT_URL="https://global.download.synology.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat"
           OLDPAT_FILE="DSM_DS3622xs+_42218.pat"
-          STATUS=$(curl -# -w "%{http_code}" -L "${OLDPAT_URL}" -o "${CACHE_DIR}/${OLDPAT_FILE}")
+          STATUS=`curl -# -w "%{http_code}" -L "${OLDPAT_URL}" -o "${CACHE_DIR}/${OLDPAT_FILE}"`
           if [ $? -ne 0 -o ${STATUS} -ne 200 ]; then
             echo "[E] DSM_DS3622xs%2B_42218.pat download error!"
             rm -rf ${CACHE_DIR}
@@ -64,7 +64,7 @@ jobs:
 
       - name: Get official modules
         run: |
-          function getOfficialModules(){
+          function getOfficialModules() {
             filename=${1}
             filename=${filename##*\/}
             filename=${filename%%\?*}
@@ -104,15 +104,20 @@ jobs:
             fi
 
             echo "extract ${filepath}/rd.gz"
-            rdpath=$(realpath ${filepath}/rd.gz)
-            rdpath=${rdpath%%\.*}
+            rdfile=`realpath ${filepath}/hda1.tgz`  # rdfile=`realpath ${filepath}/rd.gz`
+            rdpath=${rdfile%%\.*}
             mkdir -p "${rdpath}"
-            (cd "${rdpath}"; xz -dc < "${rdpath}.gz" | cpio -idm) >/dev/null 2>&1 || true
+            (cd "${rdpath}"; xz -dc < "${rdfile}" | cpio -idm) >/dev/null 2>&1 || true
             
-            plat="$(grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/')"
-            kver="$(file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g')"
-            officialpath="${{ env.OFFICIAL_PATH }}/${plat}-${kver}"
-
+            plat="`grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/'`"
+            kver="`file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g'`"
+            if [ "${plat}" = "epyc7002" ]; then
+              eval $(cat "${filepath}/VERSION" | grep majorversion)
+              eval $(cat "${filepath}/VERSION" | grep minorversion)
+              officialpath="${{ env.OFFICIAL_PATH }}/${plat}-${majorversion}.${minorversion}-${kver}"
+            else
+              officialpath="${{ env.OFFICIAL_PATH }}/${plat}-${kver}"
+            fi
             echo "copy ${plat}-${kver} modules"
             [ ! -d "${{ env.OFFICIAL_PATH }}" ] && mkdir -p "${{ env.OFFICIAL_PATH }}"
             rm -rf "${officialpath}"
@@ -121,61 +126,117 @@ jobs:
             sudo rm -rf "${filename}" "${filepath}"
           }
 
+          function getOfficialPatUrl() {
+            MODEL=$1
+            PRVER=$2
+            paturl="$(curl -skL "https://www.synology.com/api/support/findDownloadInfo?lang=en-us&product=${MODEL/+/%2B}&major=${PRVER%%.*}&minor=${PRVER##*.}" | jq -r '.info.system.detail[0].items[0].files[0].url')"
+            echo "${paturl%%\?*}"
+          }
+
+          #- version: 6.2.4 
+          #  platform: apollolake
+          getOfficialModules "$(getOfficialPatUrl "DS918+" "6.2")"
+          #- version: 6.2.4 
+          #  platform: braswell
+          getOfficialModules "$(getOfficialPatUrl "DS916+" "6.2")"
+          #- version: 6.2.4 
+          #  platform: broadwell
+          getOfficialModules "$(getOfficialPatUrl "DS3617xs" "6.2")"
+          #- version: 6.2.4 
+          #  platform: broadwellnk
+          getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "6.2")"  # DS3622xs%2B no have version 6.2.4
+          #- version: 6.2.4 
+          #  platform: bromolow
+          getOfficialModules "$(getOfficialPatUrl "DS3615xs" "6.2")"
+          #- version: 6.2.4 
+          #  platform: denverton
+          getOfficialModules "$(getOfficialPatUrl "DVA3221" "6.2")"
+          #- version: 6.2.4 
+          #  platform: geminilake
+          getOfficialModules "$(getOfficialPatUrl "DS920+" "6.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen, no have version 6.2.4.
+          #- version: 6.2.4 
+          #  platform: purley
+          getOfficialModules "$(getOfficialPatUrl "FS6400" "6.2")"
+          #- version: 6.2.4 
+          #  platform: v1000
+          getOfficialModules "$(getOfficialPatUrl "DS1621+" "6.2")"
+          #- version: 6.2.4 
+          #  platform: kvmx64
+          getOfficialModules "$(getOfficialPatUrl "VirtualDSM" "6.2")"
+
           #- version: 7.1 
           #  platform: apollolake
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS918%2B_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS918+" "7.1")"
+          #- version: 7.1
+          #  platform: braswell
+          getOfficialModules "$(getOfficialPatUrl "DS916+" "7.1")"
           #- version: 7.1
           #  platform: broadwell
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS3617xs_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.1")"
           #- version: 7.1 
           #  platform: broadwellnk
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS3622xs%2B_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS3622xs+" "7.1")"
+          #- version: 7.1 
+          #  platform: bromolow
+          getOfficialModules "$(getOfficialPatUrl "DS3615xs" "7.1")"
           #- version: 7.1
           #  platform: denverton
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DVA3221_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
           #- version: 7.1
           #  platform: epyc7002
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_SA6400_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
           #- version: 7.1 
           #  platform: geminilake
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS920%2B_42218.pat'  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
+          getOfficialModules "$(getOfficialPatUrl "DVA1622" "7.1")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
           #- version: 7.1 
           #  platform: purley
-          #getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_FS6400_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "FS6400" "7.1")"
           #- version: 7.1
           #  platform: r1000
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.1.1/42962/DSM_DS923%2B_42962.pat'  # DS923%2B no have version 7.0.1
+          getOfficialModules "$(getOfficialPatUrl "DS923+" "7.1")"  # DS923%2B no have version 7.0.1
           #- version: 7.1
           #  platform: v1000
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.0.1/42218/DSM_DS2422%2B_42218.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS1621+" "7.1")"
+          #- version: 7.1
+          #  platform: kvmx64
+          getOfficialModules "$(getOfficialPatUrl "VirtualDSM" "7.1")"
 
           #- version: 7.2 
           #  platform: apollolake
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS918%2B_64551.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS918+" "7.2")"
+          #- version: 7.2
+          #  platform: braswell
+          getOfficialModules "$(getOfficialPatUrl "DS916+" "7.2")"
           #- version: 7.2
           #  platform: broadwell
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS3617xs_64551.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.2")"
           #- version: 7.2 
           #  platform: broadwellnk
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS3622xs%2B_64551.pat'
+          getOfficialModules "$(getOfficialPatUrl "DS3622xs+" "7.2")"
+          ##- version: 7.2 
+          ##  platform: bromolow
+          #getOfficialModules "$(getOfficialPatUrl "DS3615xs" "7.2")"
           #- version: 7.2
           #  platform: denverton
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DVA3221_64551.pat'
+          getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
           #- version: 7.2
           #  platform: epyc7002
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_SA6400_64551.pat'
+          getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
           #- version: 7.2 
           #  platform: geminilake
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS920%2B_64551.pat'  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
+          getOfficialModules  "$(getOfficialPatUrl "DVA1622" "7.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
           #- version: 7.2 
           #  platform: purley
-          #getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_FS6400_64551.pat'
+          getOfficialModules  "$(getOfficialPatUrl "FS6400" "7.2")"
           #- version: 7.2
           #  platform: r1000
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS923%2B_64551.pat'
+          getOfficialModules  "$(getOfficialPatUrl "DS923+" "7.2")"
           #- version: 7.2
           #  platform: v1000
-          getOfficialModules 'https://global.synologydownload.com/download/DSM/release/7.2/64551/DSM_DS2422%2B_64551.pat'
+          getOfficialModules  "$(getOfficialPatUrl "DS1621+" "7.2")"
+          #- version: 7.2
+          #  platform: kvmx64
+          getOfficialModules  "$(getOfficialPatUrl "VirtualDSM" "7.2")"
 
       - name: Check and Push
         run: |
