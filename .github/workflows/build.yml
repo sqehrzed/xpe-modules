@@ -184,7 +184,7 @@ jobs:
           # done
 
           echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -rn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "check depends"
           for M in $(ls ${{ github.workspace }}/source/output); do
