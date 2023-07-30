@@ -5,15 +5,6 @@
 # See /LICENSE for more information.
 #
 
-# version: [ 7.1, 7.2 ]
-# platform: [ apollolake, broadwell, broadwellnk, bromolow, denverton, epyc7002, geminilake, purley, r1000, v1000 ]
-# exclude:
-#   - version: 7.1
-#     platform: broadwell
-# include:
-#   - version: "7.2"
-#     platform: "broadwell"
-
 name: Build modules
 
 on:  
@@ -175,13 +166,14 @@ jobs:
 
       - name: Tar to Artifacts
         run: |
-          #OFFICIAL_PATH="${{ github.workspace }}/official/${{ matrix.platform }}-${{ env.KVER }}"
+          OFFICIAL_PATH="${{ github.workspace }}/official/rd/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
-          # echo "copy official modules"
-          # for M in $(ls ${{ github.workspace }}/source/output); do
-          #   [ -f ${OFFICIAL_PATH}/${M} ] && cp -n ${OFFICIAL_PATH}/${M} "${{ github.workspace }}/source/output"
-          # done
+          echo "copy official modules"
+          OM=(cpufreq_performance.ko fb.ko fbdev.ko ehci-hcd.ko ehci-pci.ko processor.ko uhci-hcd.ko video.ko backlight.ko xhci-hcd.ko xhci-pci.ko)
+          for M in ${OM[@]}; do
+            [ -f ${OFFICIAL_PATH}/hda1/${M} ] && cp -f ${OFFICIAL_PATH}/hda1/${M} "${{ github.workspace }}/source/output"
+          done
 
           echo "copy 3rd modules"
           [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
