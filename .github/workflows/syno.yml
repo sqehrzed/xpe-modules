@@ -1,13 +1,13 @@
 #
 # Copyright (C) 2023 AuxXxilium <https://github.com/AuxXxilium> and Ing <https://github.com/wjz304>
-# 
+#
 # This is free software, licensed under the MIT License.
 # See /LICENSE for more information.
 #
 
 name: Get official Modules
 
-on:   
+on:
   workflow_dispatch:
 
 jobs:
@@ -61,160 +61,160 @@ jobs:
           done
           cp "${CACHE_DIR}/ramdisk/usr/syno/bin/scemd" "${TOOL_PATH}/syno_extract_system_patch"
           rm -rf ${CACHE_DIR}
-  
-        - name: Get official modules
-          run: |
-            function getOfficialModules() {
-              filename=${1}
-              filename=${filename##*\/}
-              filename=${filename%%\?*}
-              filepath=${filename%%\.*}
-  
-              echo "Download ${1}"
-              curl -#kO "${1}"
-  
-              header="$(od -bcN2 ${filename} | head -1 | awk '{print $3}')"
-              case ${header} in
-                105)
-                  echo "Uncompressed tar"
-                  isencrypted="no"
-                  ;;
-                213)
-                  echo "Compressed tar"
-                  isencrypted="no"
-                  ;;
-                255)
-                  echo "Encrypted"
-                  isencrypted="yes"
-                  ;;
-                *)
-                  echo "error"
-                  return 1
-                  ;;
-              esac
-              
-              echo "extract ${filename}"
-              mkdir -p "${filepath}"
-              if [ "${isencrypted}" = "yes" ]; then
-                TOOL_PATH="${{ env.TOOL_PATH }}"
-                sudo chmod -R +x "${TOOL_PATH}"
-                sudo LD_LIBRARY_PATH="${TOOL_PATH}" "${TOOL_PATH}/syno_extract_system_patch" "${filename}" "${filepath}"
-              else
-                tar -xf "${filename}" -C "${filepath}" >/dev/null 2>&1
-              fi
-  
-              echo "extract ${filepath}/rd.gz"
-              rdfile=`realpath ${filepath}/rd.gz`
-              rdpath=${rdfile%%\.*}
-              mkdir -p "${rdpath}"
-              (cd "${rdpath}"; xz -dc < "${rdfile}" | cpio -idm) >/dev/null 2>&1 || true
-  
-              echo "extract ${filepath}/hda1.tgz"
-              hda1file=`realpath ${filepath}/hda1.tgz`
-              hda1path=${hda1file%%\.*}
-              mkdir -p "${hda1path}"
-              (cd "${hda1path}"; xz -dc < "${hda1file}" | cpio -idm) >/dev/null 2>&1 || true
-  
-              plat="`grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/'`"
-              kver="`file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g'`"
-              if [ "${plat}" = "epyc7002" ]; then
-                eval $(cat "${filepath}/VERSION" | grep majorversion)
-                eval $(cat "${filepath}/VERSION" | grep minorversion)
-                officialrdpath="${{ env.OFFICIAL_PATH }}/rd/${plat}-${majorversion}.${minorversion}-${kver}"
-                officialhda1path="${{ env.OFFICIAL_PATH }}/hda1/${plat}-${majorversion}.${minorversion}-${kver}"
-              else
-                officialrdpath="${{ env.OFFICIAL_PATH }}/rd/${plat}-${kver}"
-                officialhda1path="${{ env.OFFICIAL_PATH }}/hda1/${plat}-${kver}"
-              fi
-  
-              echo "copy rd ${plat}-${kver} modules"
-              [ ! -d "${{ env.OFFICIAL_PATH }}/rd" ] && mkdir -p "${{ env.OFFICIAL_PATH }}/rd"
-              rm -rf "${officialrdpath}"
-              cp -a ${rdpath}/usr/lib/modules "${officialrdpath}"
-  
-              echo "copy hda1 ${plat}-${kver} modules"
-              [ ! -d "${{ env.OFFICIAL_PATH }}/hda1" ] && mkdir -p "${{ env.OFFICIAL_PATH }}/hda1"
-              rm -rf "${officialhda1path}"
-              cp -a ${hda1path}/usr/lib/modules "${officialhda1path}"
-  
-              sudo rm -rf "${filename}" "${filepath}"
-            }
-  
-            function getOfficialPatUrl() {
-              MODEL=$1
-              PRVER=$2
-              paturl="$(curl -skL "https://www.synology.com/api/support/findDownloadInfo?lang=en-us&product=${MODEL/+/%2B}&major=${PRVER%%.*}&minor=${PRVER##*.}" | jq -r '.info.system.detail[0].items[0].files[0].url')"
-              echo "${paturl%%\?*}"
-            }
-  
-            #- version: 7.1 
-            #  platform: apollolake
-            getOfficialModules "$(getOfficialPatUrl "DS918+" "7.1")"
-            #- version: 7.1
-            #  platform: broadwell
-            getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.1")"
-            #- version: 7.1 
-            #  platform: broadwellnk
-            getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.1")"
-            #- version: 7.1
-            #  platform: denverton
-            getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
-            #- version: 7.1
-            #  platform: epyc7002
-            getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
-            #- version: 7.1 
-            #  platform: geminilake
-            getOfficialModules "$(getOfficialPatUrl "DVA1622" "7.1")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
-            #- version: 7.1 
-            #  platform: purley
-            getOfficialModules "$(getOfficialPatUrl "FS6400" "7.1")"
-            #- version: 7.1
-            #  platform: r1000
-            getOfficialModules "$(getOfficialPatUrl "DS923+" "7.1")"  # DS923%2B no have version 7.0.1
-            #- version: 7.1
-            #  platform: v1000
-            getOfficialModules "$(getOfficialPatUrl "DS1621+" "7.1")"
-            #- version: 7.1
-            #  platform: kvmx64
-            getOfficialModules "$(getOfficialPatUrl "VirtualDSM" "7.1")"
-  
-            #- version: 7.2 
-            #  platform: apollolake
-            getOfficialModules "$(getOfficialPatUrl "DS918+" "7.2")"
-            #- version: 7.2
-            #  platform: broadwell
-            getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.2")"
-            #- version: 7.2 
-            #  platform: broadwellnk
-            getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.2")"
-            #- version: 7.2
-            #  platform: denverton
-            getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
-            #- version: 7.2
-            #  platform: epyc7002
-            getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
-            #- version: 7.2 
-            #  platform: geminilake
-            getOfficialModules  "$(getOfficialPatUrl "DVA1622" "7.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
-            #- version: 7.2 
-            #  platform: purley
-            #getOfficialModules  "$(getOfficialPatUrl "FS6400" "7.2")"
-            #- version: 7.2
-            #  platform: r1000
-            getOfficialModules  "$(getOfficialPatUrl "DS923+" "7.2")"
-            #- version: 7.2
-            #  platform: v1000
-            getOfficialModules  "$(getOfficialPatUrl "DS1621+" "7.2")"
-            #- version: 7.2
-            #  platform: kvmx64
-            getOfficialModules  "$(getOfficialPatUrl "VirtualDSM" "7.2")"
-  
-        - name: Check and Push
-          run: |
-            git pull
-            status=$(git status -s | grep -E '${{ env.OFFICIAL_PATH }}' | awk '{printf " %s", $2}')
-            if [ -n "${status}" ]; then
-              git add ${status}
-              git commit -m "modules: update Syno $(date +%Y-%m-%d" "%H:%M:%S)"
-              git push -f
+
+      - name: Get official modules
+        run: |
+          function getOfficialModules() {
+            filename=${1}
+            filename=${filename##*\/}
+            filename=${filename%%\?*}
+            filepath=${filename%%\.*}
+
+            echo "Download ${1}"
+            curl -#kO "${1}"
+
+            header="$(od -bcN2 ${filename} | head -1 | awk '{print $3}')"
+            case ${header} in
+              105)
+                echo "Uncompressed tar"
+                isencrypted="no"
+                ;;
+              213)
+                echo "Compressed tar"
+                isencrypted="no"
+                ;;
+              255)
+                echo "Encrypted"
+                isencrypted="yes"
+                ;;
+              *)
+                echo "error"
+                return 1
+                ;;
+            esac
+            
+            echo "extract ${filename}"
+            mkdir -p "${filepath}"
+            if [ "${isencrypted}" = "yes" ]; then
+              TOOL_PATH="${{ env.TOOL_PATH }}"
+              sudo chmod -R +x "${TOOL_PATH}"
+              sudo LD_LIBRARY_PATH="${TOOL_PATH}" "${TOOL_PATH}/syno_extract_system_patch" "${filename}" "${filepath}"
+            else
+              tar -xf "${filename}" -C "${filepath}" >/dev/null 2>&1
             fi
+
+            echo "extract ${filepath}/rd.gz"
+            rdfile=`realpath ${filepath}/rd.gz`
+            rdpath=${rdfile%%\.*}
+            mkdir -p "${rdpath}"
+            (cd "${rdpath}"; xz -dc < "${rdfile}" | cpio -idm) >/dev/null 2>&1 || true
+
+            echo "extract ${filepath}/hda1.tgz"
+            hda1file=`realpath ${filepath}/hda1.tgz`
+            hda1path=${hda1file%%\.*}
+            mkdir -p "${hda1path}"
+            (cd "${hda1path}"; xz -dc < "${hda1file}" | cpio -idm) >/dev/null 2>&1 || true
+
+            plat="`grep unique "${filepath}/VERSION" | sed -r 's/.*_(.*)_.*/\1/'`"
+            kver="`file "${filepath}/zImage" | awk '{printf $9}' | sed 's/+//g'`"
+            if [ "${plat}" = "epyc7002" ]; then
+              eval $(cat "${filepath}/VERSION" | grep majorversion)
+              eval $(cat "${filepath}/VERSION" | grep minorversion)
+              officialrdpath="${{ env.OFFICIAL_PATH }}/rd/${plat}-${majorversion}.${minorversion}-${kver}"
+              officialhda1path="${{ env.OFFICIAL_PATH }}/hda1/${plat}-${majorversion}.${minorversion}-${kver}"
+            else
+              officialrdpath="${{ env.OFFICIAL_PATH }}/rd/${plat}-${kver}"
+              officialhda1path="${{ env.OFFICIAL_PATH }}/hda1/${plat}-${kver}"
+            fi
+
+            echo "copy rd ${plat}-${kver} modules"
+            [ ! -d "${{ env.OFFICIAL_PATH }}/rd" ] && mkdir -p "${{ env.OFFICIAL_PATH }}/rd"
+            rm -rf "${officialrdpath}"
+            cp -a ${rdpath}/usr/lib/modules "${officialrdpath}"
+
+            echo "copy hda1 ${plat}-${kver} modules"
+            [ ! -d "${{ env.OFFICIAL_PATH }}/hda1" ] && mkdir -p "${{ env.OFFICIAL_PATH }}/hda1"
+            rm -rf "${officialhda1path}"
+            cp -a ${hda1path}/usr/lib/modules "${officialhda1path}"
+
+            sudo rm -rf "${filename}" "${filepath}"
+          }
+
+          function getOfficialPatUrl() {
+            MODEL=$1
+            PRVER=$2
+            paturl="$(curl -skL "https://www.synology.com/api/support/findDownloadInfo?lang=en-us&product=${MODEL/+/%2B}&major=${PRVER%%.*}&minor=${PRVER##*.}" | jq -r '.info.system.detail[0].items[0].files[0].url')"
+            echo "${paturl%%\?*}"
+          }
+
+          #- version: 7.1 
+          #  platform: apollolake
+          getOfficialModules "$(getOfficialPatUrl "DS918+" "7.1")"
+          #- version: 7.1
+          #  platform: broadwell
+          getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.1")"
+          #- version: 7.1 
+          #  platform: broadwellnk
+          getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.1")"
+          #- version: 7.1
+          #  platform: denverton
+          getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
+          #- version: 7.1
+          #  platform: epyc7002
+          getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
+          #- version: 7.1 
+          #  platform: geminilake
+          getOfficialModules "$(getOfficialPatUrl "DVA1622" "7.1")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
+          #- version: 7.1 
+          #  platform: purley
+          #getOfficialModules "$(getOfficialPatUrl "FS6400" "7.1")"
+          #- version: 7.1
+          #  platform: r1000
+          getOfficialModules "$(getOfficialPatUrl "DS923+" "7.1")"  # DS923%2B no have version 7.0.1
+          #- version: 7.1
+          #  platform: v1000
+          getOfficialModules "$(getOfficialPatUrl "DS1621+" "7.1")"
+          #- version: 7.1
+          #  platform: kvmx64
+          getOfficialModules "$(getOfficialPatUrl "VirtualDSM" "7.1")"
+
+          #- version: 7.2 
+          #  platform: apollolake
+          getOfficialModules "$(getOfficialPatUrl "DS918+" "7.2")"
+          #- version: 7.2
+          #  platform: broadwell
+          getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.2")"
+          #- version: 7.2 
+          #  platform: broadwellnk
+          getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.2")"
+          #- version: 7.2
+          #  platform: denverton
+          getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
+          #- version: 7.2
+          #  platform: epyc7002
+          getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
+          #- version: 7.2 
+          #  platform: geminilake
+          getOfficialModules  "$(getOfficialPatUrl "DVA1622" "7.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
+          #- version: 7.2 
+          #  platform: purley
+          #getOfficialModules  "$(getOfficialPatUrl "FS6400" "7.2")"
+          #- version: 7.2
+          #  platform: r1000
+          getOfficialModules  "$(getOfficialPatUrl "DS923+" "7.2")"
+          #- version: 7.2
+          #  platform: v1000
+          getOfficialModules  "$(getOfficialPatUrl "DS1621+" "7.2")"
+          #- version: 7.2
+          #  platform: kvmx64
+          getOfficialModules  "$(getOfficialPatUrl "VirtualDSM" "7.2")"
+
+      - name: Check and Push
+        run: |
+          git pull
+          status=$(git status -s | grep -E '${{ env.OFFICIAL_PATH }}' | awk '{printf " %s", $2}')
+          if [ -n "${status}" ]; then
+            git add ${status}
+            git commit -m "modules: update official $(date +%Y-%m-%d" "%H:%M:%S)"
+            git push -f
+          fi
