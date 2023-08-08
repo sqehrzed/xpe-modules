@@ -78,7 +78,7 @@ jobs:
           git config --global user.email "info@auxxxilium.tech"
           git config --global user.name "AuxXxilium"
           sudo timedatectl set-timezone "Europe/Berlin" 
-          
+
       - name: Get EnvDeploy
         run: |
           ROOT_PATH=${{ github.workspace }}
@@ -118,7 +118,7 @@ jobs:
             [ -f "/env64.mak" ] && echo "CCVER=${CCVER}" >> /env64.mak
           fi
           EOF
-          
+
           [ -f ${ENV_PATH}/env64.mak ] && ENV_FILE=${ENV_PATH}/env64.mak || ([ -f ${ENV_PATH}/env32.mak ] && ENV_FILE=${ENV_PATH}/env32.mak)
           if [ -n "${ENV_FILE}" ]; then
             KVER=`grep 'KVER=' ${ENV_FILE} | awk -F'=' '{print $2}'`
@@ -170,9 +170,6 @@ jobs:
           OFFICIAL_PATH="${{ github.workspace }}/official/hda1/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
-          echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
-          
           echo "copy official modules"
           OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
           for M in ${OM[@]}; do
@@ -187,6 +184,9 @@ jobs:
             }
             _copydepends "${M}.ko"
           done
+
+          echo "copy 3rd modules"
+          [ -d "${PARTY3RD_PATH}" ] && cp -rf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "check depends"
           for M in `ls ${{ github.workspace }}/source/output`; do
