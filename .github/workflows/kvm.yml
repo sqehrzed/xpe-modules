@@ -23,17 +23,13 @@ jobs:
           # - version: 7.1 
           #   platform: apollolake
           # - version: 7.1
-          #   platform: braswell
-          # - version: 7.1
           #   platform: broadwell
           # - version: 7.1 
           #   platform: broadwellnk
-          # - version: 7.1 
-          #   platform: bromolow
           # - version: 7.1
           #   platform: denverton
-          - version: 7.1
-            platform: epyc7002
+          #- version: 7.1
+          #  platform: epyc7002
           # - version: 7.1 
           #   platform: geminilake
           # - version: 7.1 
@@ -46,17 +42,13 @@ jobs:
           - version: 7.2 
             platform: apollolake
           - version: 7.2
-            platform: braswell
-          - version: 7.2
             platform: broadwell
           - version: 7.2 
             platform: broadwellnk
-          #- version: 7.2 
-          #  platform: bromolow
           - version: 7.2
             platform: denverton
-          - version: 7.2
-            platform: epyc7002
+          #- version: 7.2
+          #  platform: epyc7002
           - version: 7.2 
             platform: geminilake
           #- version: 7.2 

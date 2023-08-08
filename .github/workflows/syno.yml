@@ -161,7 +161,7 @@ jobs:
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
           #- version: 7.1
           #  platform: epyc7002
-          getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
+          #getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
           #- version: 7.1 
           #  platform: geminilake
           getOfficialModules "$(getOfficialPatUrl "DVA1622" "7.1")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
@@ -192,7 +192,7 @@ jobs:
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
           #- version: 7.2
           #  platform: epyc7002
-          getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
+          #getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
           #- version: 7.2 
           #  platform: geminilake
           getOfficialModules  "$(getOfficialPatUrl "DVA1622" "7.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
