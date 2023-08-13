@@ -171,13 +171,13 @@ jobs:
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
           echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -nva "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          [ -d "${PARTY3RD_PATH}" ] && cp -vn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "copy official modules"
           OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
           for M in ${OM[@]}; do
             function _copydepends() {
-              [ -f "${OFFICIAL_PATH}/${1}" ] && [ ! -f "${OFFICIAL_PATH/hda1/rd}/${1}" ] && cp -vfa "${OFFICIAL_PATH}/${1}" "${{ github.workspace }}/source/output"
+              [ -f "${OFFICIAL_PATH}/${1}" ] && cp -vf "${OFFICIAL_PATH}/${1}" "${{ github.workspace }}/source/output"
               depends=($(modinfo "${OFFICIAL_PATH}/${1}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'))
               if [ ${#depends[*]} -gt 0 ]; then
                 for k in ${depends[@]}; do
@@ -200,11 +200,7 @@ jobs:
               done
             fi
           done
-          if [ "${{ matrix.platform }}" = "epyc7002" ]; then
-            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.version }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
-          else
-            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
-          fi
+          tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -296,7 +292,7 @@ jobs:
           echo "VERSION: ${VERSION}"
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: download to artifacts
+      - name: download from artifacts
         if: env.VERSION != ''
         uses: actions/download-artifact@v3
         with:
@@ -314,4 +310,6 @@ jobs:
         if: env.VERSION != ''
         with:
           tag_name: ${{ env.VERSION }}
-          files: modules.zip
+          files: |
+              modules.zip
+              *.tgz
