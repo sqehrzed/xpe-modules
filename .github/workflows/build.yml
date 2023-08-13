@@ -14,7 +14,7 @@
 #   - version: "7.2"
 #     platform: "broadwell"
 
-name: Build modules
+name: Build Modules
 
 on:
   workflow_dispatch:
@@ -171,7 +171,7 @@ jobs:
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
           echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -vn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          [ -d "${PARTY3RD_PATH}" ] && cp -vf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "copy official modules"
           OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
