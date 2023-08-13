@@ -23,6 +23,10 @@ on:
         description: 'format %y.%-m.$i or auto'
         required: false
         type: string
+      make:
+        description: 'make'
+        default: true
+        type: boolean
 
 jobs:
   build:
@@ -140,6 +144,7 @@ jobs:
           sudo cp -a ${ROOT_PATH}/source ${ROOT_PATH}/build_env/ds.${{ matrix.platform }}-${{ matrix.version }}/
 
       - name: Make
+        if: success() && inputs.make == true
         run: |
           ROOT_PATH=${{ github.workspace }}
 
@@ -167,6 +172,11 @@ jobs:
 
       - name: Tar to Artifacts
         run: |
+          if [ ! -d "${{ github.workspace }}/source/output" ]; then
+            mkdir -p "${{ github.workspace }}/source/output"
+            chmod a+rw -R "${{ github.workspace }}/source/output"
+          fi
+
           OFFICIAL_PATH="${{ github.workspace }}/official/hda1/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
