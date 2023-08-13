@@ -322,4 +322,4 @@ jobs:
           tag_name: ${{ env.VERSION }}
           files: |
               modules.zip
-              *.tgz
+              ./modules/*.tgz
