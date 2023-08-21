@@ -231,7 +231,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
-      - name: Download to Artifacts
+      - name: Download from Artifacts
         uses: actions/download-artifact@v3
         with:
           name: modules
@@ -299,9 +299,18 @@ jobs:
             echo "${CHANGELOG}" >"modules/changelog.txt"
           fi
 
-          echo "VERSION: ${VERSION}"
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "${VERSION}" >"modules/VERSION"
+          if [ -n "${VERSION}" ]; then
+            # Modify Source File
+            echo "${VERSION}" >VERSION
+
+            git pull
+            status=$(git status -s | awk '{printf " %s", $2}')
+            if [ -n "${status}" ]; then
+              git add ${status}
+              git commit -m "build: ${VERSION}"
+              git push -f
+            fi
+          fi
 
       - name: Download from Artifacts
         if: env.VERSION != ''
