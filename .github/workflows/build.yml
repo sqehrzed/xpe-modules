@@ -278,6 +278,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
 
+      - name: Download from Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: modules
+          path: ./modules
+
       - name: Calculate Version
         run: |
           # Calculate Version
@@ -292,11 +298,11 @@ jobs:
           CHANGELOG=$(git log --pretty=format:"%s" ${LATEST_TAG}..HEAD | sort)
           if [ -n "${CHANGELOG}" ]; then
             echo "Changelog: ${CHANGELOG}"
-            echo "${CHANGELOG}" >"modules/changelog.txt"
+            echo "${CHANGELOG}" >"./modules/changelog.txt"
           else
             CHANGELOG='New Build Tree'
             echo "Changelog: ${CHANGELOG}"
-            echo "${CHANGELOG}" >"modules/changelog.txt"
+            echo "${CHANGELOG}" >"./modules/changelog.txt"
           fi
 
           if [ -n "${VERSION}" ]; then
@@ -313,13 +319,6 @@ jobs:
               git push -f
             fi
           fi
-
-      - name: Download from Artifacts
-        if: env.VERSION != ''
-        uses: actions/download-artifact@v3
-        with:
-          name: modules
-          path: ./modules
 
       - name: Zip Modules
         if: env.VERSION != ''
