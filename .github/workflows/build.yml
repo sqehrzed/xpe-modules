@@ -276,7 +276,13 @@ jobs:
     needs: firmware
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
+
+      - name: Init Env
+        run: |
+          git config --global user.email "info@auxxxilium.tech"
+          git config --global user.name "AuxXxilium"
+          sudo timedatectl set-timezone "Europe/Berlin" 
 
       - name: Download from Artifacts
         uses: actions/download-artifact@v3
