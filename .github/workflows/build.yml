@@ -315,6 +315,7 @@ jobs:
             # Modify Source File
             echo "Version: ${VERSION}"
             echo "${VERSION}" >VERSION
+            echo "${VERSION}" >"./modules/VERSION"
             echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
             git pull
