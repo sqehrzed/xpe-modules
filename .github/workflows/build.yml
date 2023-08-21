@@ -23,10 +23,10 @@ on:
         description: 'pre release'
         default: false
         type: boolean
-    make:
-      description: 'make'
-      default: true
-      type: boolean
+      make:
+        description: 'make'
+        default: true
+        type: boolean
 
 jobs:
   build:
