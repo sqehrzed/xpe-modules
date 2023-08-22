@@ -180,19 +180,7 @@ jobs:
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
           echo "copy official modules"
-          OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
-          for M in ${OM[@]}; do
-            function _copydepends() {
-              [ -f "${OFFICIAL_PATH}/${1}" ] && [ ! -f "${OFFICIAL_PATH/hda1/rd}/${1}" ] && cp -f "${OFFICIAL_PATH}/${1}" "${{ github.workspace }}/source/output"
-              depends=($(modinfo "${OFFICIAL_PATH}/${1}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'))
-              if [ ${#depends[*]} -gt 0 ]; then
-                for k in ${depends[@]}; do
-                  _copydepends "${k}.ko"
-                done
-              fi
-            }
-            _copydepends "${M}.ko"
-          done
+          [ -d "${OFFICIAL_PATH}" ] && cp -Rvn "${OFFICIAL_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "copy 3rd modules"
           [ -d "${PARTY3RD_PATH}" ] && cp -Rvn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
