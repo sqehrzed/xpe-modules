@@ -176,7 +176,7 @@ jobs:
             mkdir -p "${{ github.workspace }}/source/output"
           fi
 
-          OFFICIAL_PATH="${{ github.workspace }}/official/hda1/${{ matrix.platform }}-${{ env.KVER }}"
+          OFFICIAL_PATH="${{ github.workspace }}/official/rd/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
           echo "copy official modules"
