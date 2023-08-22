@@ -174,6 +174,7 @@ jobs:
         run: |
           if [ ! -d "${{ github.workspace }}/source/output" ]; then
             mkdir -p "${{ github.workspace }}/source/output"
+            chmod a+rw -R "${{ github.workspace }}/source/output"
           fi
 
           OFFICIAL_PATH="${{ github.workspace }}/official/rd/${{ matrix.platform }}-${{ env.KVER }}"
@@ -197,7 +198,6 @@ jobs:
               done
             fi
           done
-          chmod a+rw -R "${{ github.workspace }}/source/output"
           tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
 
       - name: Upload to Artifacts
