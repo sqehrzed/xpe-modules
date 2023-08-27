@@ -27,10 +27,6 @@ on:
         description: 'pre release'
         default: false
         type: boolean
-      make:
-        description: 'make'
-        default: true
-        type: boolean
 
 jobs:
   build:
@@ -93,9 +89,8 @@ jobs:
 
           git clone https://github.com/SynologyOpenSource/pkgscripts-ng.git ${ROOT_PATH}/pkgscripts-ng
           cd ${ROOT_PATH}/pkgscripts-ng
-          # if version == 6.2, checkout 6.2.4
-          git checkout DSM${{ matrix.version }}`[ "${{ matrix.version }}" = "6.2" ] && echo ".4"`
-          sudo ./EnvDeploy -v ${{ matrix.version }}`[ "${{ matrix.version }}" = "6.2" ] && echo ".4"` -l  # Get Available platforms
+          git checkout DSM${{ matrix.version }}
+          sudo ./EnvDeploy -v ${{ matrix.version }} -l  # Get Available platforms
           sudo ./EnvDeploy -q -v ${{ matrix.version }} -p ${{ matrix.platform }}
 
           #ENV
@@ -147,33 +142,6 @@ jobs:
 
           sudo cp -a ${ROOT_PATH}/source ${ROOT_PATH}/build_env/ds.${{ matrix.platform }}-${{ matrix.version }}/
 
-      - name: Make
-        if: success() && inputs.make == true
-        run: |
-          ROOT_PATH=${{ github.workspace }}
-
-          sudo chroot build_env/ds.${{ matrix.platform }}-${{ matrix.version }} << "EOF"
-          sed -i 's/^CFLAGS=/#CFLAGS=/g; s/^CXXFLAGS=/#CXXFLAGS=/g' /env${BUILD_ARCH}.mak
-          while read line; do if [ ${line:0:1} != "#" ]; then export ${line%%=*}="${line#*=}"; fi; done < /env${BUILD_ARCH}.mak
-          cd /source/input
-          [ -z "`grep 'env.mak' Makefile`" ] && sed -i '1 i include /env.mak' Makefile
-
-          if [ -f "defines.${{ matrix.platform }}" ]; then
-            PARMS+=" `cat "defines.${{ matrix.platform }}" | xargs`"
-          else
-            echo "[E] ${{ matrix.platform }}-${{ matrix.version }}"
-          fi
-          make -j`nproc` -C "${KSRC}" M="${PWD}" ${PARMS} modules
-          while read F; do
-            strip -g "${F}"
-            echo "Copying `basename ${F}`"
-            cp "${F}" "/source/output"
-          done < <(find ${PWD} -name \*.ko)
-          EOF
-
-          sudo cp -a ${ROOT_PATH}/build_env/ds.${{ matrix.platform }}-${{ matrix.version }}/source/output ${ROOT_PATH}/source/
-          sudo chmod a+rw -R ${ROOT_PATH}/source/output
-
       - name: Tar to Artifacts
         run: |
           if [ ! -d "${{ github.workspace }}/source/output" ]; then
@@ -183,6 +151,9 @@ jobs:
 
           OFFICIAL_PATH="${{ github.workspace }}/official/rd/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
+
+          echo "copy 3rd modules"
+          [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "copy official modules"
           OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
@@ -198,9 +169,6 @@ jobs:
             }
             _copydepends "${M}.ko"
           done
-
-          echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -Rvn "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "check depends"
           for M in `ls ${{ github.workspace }}/source/output`; do
