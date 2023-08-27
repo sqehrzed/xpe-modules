@@ -5,9 +5,4 @@ test.sh
 *.mod.*
 .tmp_versions
 /src/**/*.ko
-./modules/
-./firmware/
-./source/
-modules/
-firmware/
-source/
+.vscode/
