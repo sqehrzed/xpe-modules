@@ -130,18 +130,6 @@ jobs:
             [ -n "${CCVER}" ] && echo "CCVER=${CCVER}" >> $GITHUB_ENV
           fi
 
-      - name: Get Src
-        run: |
-          ROOT_PATH=${{ github.workspace }}
-
-          mkdir -p ${ROOT_PATH}/source/output
-          repo=${{ env.repo }}
-          KVER=${{ env.KVER }}
-
-          sudo cp -a ${ROOT_PATH}/src/${KVER:0:1}.x ${ROOT_PATH}/source/input
-
-          sudo cp -a ${ROOT_PATH}/source ${ROOT_PATH}/build_env/ds.${{ matrix.platform }}-${{ matrix.version }}/
-
       - name: Tar to Artifacts
         run: |
           if [ ! -d "${{ github.workspace }}/source/output" ]; then
