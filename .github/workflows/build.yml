@@ -144,7 +144,7 @@ jobs:
           [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
 
           echo "copy official modules"
-          OM=(cpufreq_performance i915 processor ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
+          OM=(cpufreq_performance i915 processor mlx4_core mlx4_en mlx4_ib mlx5_ib mlx5_core ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
           for M in ${OM[@]}; do
             function _copydepends() {
               [ -f "${OFFICIAL_PATH}/${1}" ] && cp -f "${OFFICIAL_PATH}/${1}" "${{ github.workspace }}/source/output"
