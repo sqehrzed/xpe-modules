@@ -147,27 +147,30 @@ jobs:
             echo "${paturl%%\?*}"
           }
 
-          #- version: 7.1 
+          #- version: 7.1
           #  platform: apollolake
           getOfficialModules "$(getOfficialPatUrl "DS918+" "7.1")"
           #- version: 7.1
           #  platform: broadwell
           getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.1")"
-          #- version: 7.1 
+          #- version: 7.1
           #  platform: broadwellnk
           getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.1")"
+          #- version: 7.1
+          #  platform: broadwellnkv2
+          getOfficialModules "$(getOfficialPatUrl "SA3410" "7.1")"
           #- version: 7.1
           #  platform: denverton
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
           #- version: 7.1
           #  platform: epyc7002
           #getOfficialModules "$(getOfficialPatUrl "SA6400" "7.1")"
-          #- version: 7.1 
+          #- version: 7.1
           #  platform: geminilake
           getOfficialModules "$(getOfficialPatUrl "DVA1622" "7.1")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
-          #- version: 7.1 
+          #- version: 7.1
           #  platform: purley
-          #getOfficialModules "$(getOfficialPatUrl "FS6400" "7.1")"
+          getOfficialModules "$(getOfficialPatUrl "FS6400" "7.1")"
           #- version: 7.1
           #  platform: r1000
           getOfficialModules "$(getOfficialPatUrl "DS923+" "7.1")"  # DS923%2B no have version 7.0.1
@@ -178,27 +181,30 @@ jobs:
           #  platform: kvmx64
           getOfficialModules "$(getOfficialPatUrl "VirtualDSM" "7.1")"
 
-          #- version: 7.2 
+          #- version: 7.2
           #  platform: apollolake
           getOfficialModules "$(getOfficialPatUrl "DS918+" "7.2")"
           #- version: 7.2
           #  platform: broadwell
           getOfficialModules "$(getOfficialPatUrl "DS3617xs" "7.2")"
-          #- version: 7.2 
+          #- version: 7.2
           #  platform: broadwellnk
           getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.2")"
+          #- version: 7.2
+          #  platform: broadwellnkv2
+          getOfficialModules "$(getOfficialPatUrl "SA3410" "7.2")"
           #- version: 7.2
           #  platform: denverton
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
           #- version: 7.2
           #  platform: epyc7002
           #getOfficialModules  "$(getOfficialPatUrl "SA6400" "7.2")"
-          #- version: 7.2 
+          #- version: 7.2
           #  platform: geminilake
           getOfficialModules  "$(getOfficialPatUrl "DVA1622" "7.2")"  # DVA1622 have i915.ko, but only supports 2nd to 9th gen.
-          #- version: 7.2 
+          #- version: 7.2
           #  platform: purley
-          #getOfficialModules  "$(getOfficialPatUrl "FS6400" "7.2")"
+          getOfficialModules  "$(getOfficialPatUrl "FS6400" "7.2")"
           #- version: 7.2
           #  platform: r1000
           getOfficialModules  "$(getOfficialPatUrl "DS923+" "7.2")"
