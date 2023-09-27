@@ -20,39 +20,47 @@ jobs:
     strategy:
       matrix:
         include:
-          # - version: 7.1 
+          # - version: 7.1
           #   platform: apollolake
           # - version: 7.1
           #   platform: broadwell
-          # - version: 7.1 
+          # - version: 7.1
           #   platform: broadwellnk
           # - version: 7.1
+          #   platform: broadwellnkv2
+          # - version: 7.1
+          #   platform: broadwellntbap
+          # - version: 7.1
           #   platform: denverton
-          #- version: 7.1
-          #  platform: epyc7002
-          # - version: 7.1 
+          # - version: 7.1
           #   platform: geminilake
-          # - version: 7.1 
+          # #- version: 7.1
+          # #  platform: grantley
+          # - version: 7.1
           #   platform: purley
           # - version: 7.1
           #   platform: r1000
           # - version: 7.1
           #   platform: v1000
 
-          - version: 7.2 
+          - version: 7.2
             platform: apollolake
           - version: 7.2
             platform: broadwell
-          - version: 7.2 
+          - version: 7.2
             platform: broadwellnk
           - version: 7.2
+            platform: broadwellnkv2
+          - version: 7.2
+            platform: broadwellntbap
+          - version: 7.2
             platform: denverton
-          #- version: 7.2
-          #  platform: epyc7002
-          - version: 7.2 
+          - version: 7.2
             platform: geminilake
-          #- version: 7.2 
-          #  platform: purley
+          #- version: 7.2
+          #  platform: grantley
+          - version: 7.2
+            platform: purley
           - version: 7.2
             platform: r1000
           - version: 7.2
@@ -81,6 +89,11 @@ jobs:
           git checkout DSM${{ matrix.version }}`[ "${{ matrix.version }}" = "6.2" ] && echo ".4"`
           sudo ./EnvDeploy -v ${{ matrix.version }}`[ "${{ matrix.version }}" = "6.2" ] && echo ".4"` -l  # Get Available platforms
           sudo ./EnvDeploy -q -v ${{ matrix.version }} -p ${{ matrix.platform }}
+
+          # Fault tolerance of pkgscripts-ng
+          if [ "${{ matrix.platform }}" == "broadwellntbap" -a "${{ matrix.version }}" == "7.1" ]; then
+            sed -i '/		broadwellnk	BROADWELLNK/a\		broadwellntbap  BROADWELLNTBAP                  linux-4.4.x             Intel Broadwell with ntb kernel config in AP mode' ${ROOT_PATH}/pkgscripts-ng/include/platforms
+          fi
 
           #ENV
           mkdir -p ${ROOT_PATH}/source

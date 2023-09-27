@@ -158,7 +158,10 @@ jobs:
           getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.1")"
           #- version: 7.1
           #  platform: broadwellnkv2
-          getOfficialModules "$(getOfficialPatUrl "SA3410" "7.1")"
+          getOfficialModules "$(getOfficialPatUrl "SA3610" "7.1")"
+          #- version: 7.1
+          #  platform: broadwellntbap
+          getOfficialModules "$(getOfficialPatUrl "SA3400D" "7.1")"
           #- version: 7.1
           #  platform: denverton
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.1")"
@@ -192,7 +195,10 @@ jobs:
           getOfficialModules "$(getOfficialPatUrl "DS1621xs+" "7.2")"
           #- version: 7.2
           #  platform: broadwellnkv2
-          getOfficialModules "$(getOfficialPatUrl "SA3410" "7.2")"
+          getOfficialModules "$(getOfficialPatUrl "SA3610" "7.2")"
+          #- version: 7.2
+          #  platform: broadwellntbap
+          getOfficialModules "$(getOfficialPatUrl "SA3400D" "7.2")"
           #- version: 7.2
           #  platform: denverton
           getOfficialModules "$(getOfficialPatUrl "DVA3221" "7.2")"
