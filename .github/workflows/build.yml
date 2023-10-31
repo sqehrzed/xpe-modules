@@ -149,9 +149,6 @@ jobs:
           OFFICIAL_PATH="${{ github.workspace }}/official/rd/${{ matrix.platform }}-${{ env.KVER }}"
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
 
-          echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
-
           echo "copy official modules"
           OM=(cpufreq_performance i915 processor mlx4_core mlx4_en mlx4_ib mlx5_ib mlx5_core ehci-hcd ehci-pci uhci-hcd xhci-hcd xhci-pci)
           for M in ${OM[@]}; do
@@ -166,7 +163,10 @@ jobs:
             }
             _copydepends "${M}.ko"
           done
-
+          
+          echo "copy 3rd modules"
+          [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          
           echo "check depends"
           for M in `ls ${{ github.workspace }}/source/output`; do
             depends=(`modinfo "${{ github.workspace }}/source/output/${M}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'`)
