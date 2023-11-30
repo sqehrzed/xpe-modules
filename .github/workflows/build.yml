@@ -115,7 +115,7 @@ jobs:
           sed -i '/PLATFORM_FAMILY/a\\techo "PRODUCT=$PRODUCT" >> $file\n\techo "KSRC=$KERNEL_SEARCH_PATH" >> $file\n\techo "LINUX_SRC=$KERNEL_SEARCH_PATH" >> $file' include/build
           ./SynoBuild -c -p ${{ matrix.platform }}
 
-          while read line; do if [ ${line:0:1} != "#" ]; then export ${line%%=*}="${line#*=}"; fi; done < /env${BUILD_ARCH}.mak
+          while read -r line; do if [ ${line:0:1} != "#" ]; then export ${line%%=*}="${line#*=}"; fi; done < /env${BUILD_ARCH}.mak
           if [ -f "${KSRC}/Makefile" ]; then
             # gcc issue "unrecognized command-line option '--param=allow-store-data-races=0'".
             [ "${{ matrix.version }}" == "7.2" ] && sed -i 's/--param=allow-store-data-races=0/--allow-store-data-races/g' ${KSRC}/Makefile
@@ -203,7 +203,7 @@ jobs:
           echo "get firmware"
           SOURCE=/tmp/linux-firmware
           git clone https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git ${SOURCE}
-          while read L; do
+          while read -r L; do
             if [ -e "${SOURCE}/${L}" ]; then
               mkdir -p "`dirname firmware/${L}`"
               cp "${SOURCE}/${L}" "firmware/${L}"
