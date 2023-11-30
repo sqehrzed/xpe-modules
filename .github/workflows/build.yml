@@ -64,8 +64,8 @@ jobs:
             platform: broadwellnkv2
           - version: 7.2
             platform: denverton
-          #- version: 7.2
-          #  platform: epyc7002
+          - version: 7.2
+            platform: epyc7002
           - version: 7.2 
             platform: geminilake
           - version: 7.2 
@@ -98,7 +98,7 @@ jobs:
           sudo ./EnvDeploy -q -v ${{ matrix.version }} -p ${{ matrix.platform }}
 
           # Fault tolerance of pkgscripts-ng
-          if [ "${{ matrix.platform }}" == "broadwellntbap" -a "${{ matrix.version }}" == "7.1" ]; then
+          if [[ "${{ matrix.platform }}" == "broadwellntbap" && "${{ matrix.version }}" == "7.1" ]]; then
             sed -i '/		broadwellnk	BROADWELLNK/a\		broadwellntbap  BROADWELLNTBAP                  linux-4.4.x             Intel Broadwell with ntb kernel config in AP mode' ${ROOT_PATH}/pkgscripts-ng/include/platforms
           fi
 
@@ -214,14 +214,12 @@ jobs:
 
           tar caf firmware.tgz -C firmware .
 
-
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: modules
           path: |
             firmware.tgz
-
 
   release:
     runs-on: ubuntu-latest
