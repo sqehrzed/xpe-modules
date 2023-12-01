@@ -35,65 +35,65 @@ jobs:
         include:
           - version: 7.1 
             platform: apollolake
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1
             platform: broadwell
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1 
             platform: broadwellnk
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1 
             platform: broadwellnkv2
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1
             platform: denverton
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1
             platform: epyc7002
-            kver: 5.10.55
+            kver: "5.10.55"
           - version: 7.1 
             platform: geminilake
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1 
             platform: purley
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1
             platform: r1000
-            kver: 4.4.180
+            kver: "4.4.180"
           - version: 7.1
             platform: v1000
-            kver: 4.4.180
+            kver: "4.4.180"
 
           - version: 7.2 
             platform: apollolake
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2
             platform: broadwell
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2 
             platform: broadwellnk
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2 
             platform: broadwellnkv2
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2
             platform: denverton
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2
             platform: epyc7002
-            kver: 5.10.55
+            kver: "5.10.55"
           - version: 7.2 
             platform: geminilake
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2 
             platform: purley
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2
             platform: r1000
-            kver: 4.4.302
+            kver: "4.4.302"
           - version: 7.2
             platform: v1000
-            kver: 4.4.302
+            kver: "4.4.302"
 
     runs-on: ubuntu-latest
 
@@ -115,13 +115,13 @@ jobs:
           fi
 
           if [ "${{ matrix.platform }}" = "epyc7002" ]; then
-            PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ matrix.version }}"-${{ matrix.kver }}"
+            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.version }}"-${{ matrix.kver }}"
           else
-            PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ matrix.kver }}"
+            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.kver }}"
           fi
 
           echo "copy 3rd modules"
-          [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
+          [ -d "${MODULES_PATH}" ] && cp -Rvf "${MODULES_PATH}/." "${{ github.workspace }}/source/output"
 
           if [ "${{ matrix.platform }}" = "epyc7002" ]; then
             tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.version }}-${{ matrix.kver }}.tgz -C ${{ github.workspace }}/source/output .
@@ -135,7 +135,7 @@ jobs:
           name: modules
           path: |
             ${{ github.workspace }}/source/*.tgz
-            
+
   firmware:
     runs-on: ubuntu-latest
     needs: build
@@ -154,8 +154,8 @@ jobs:
           mkdir -p firmware
 
           echo "copy 3rd modules"
-          PARTY3RD_PATH="${{ github.workspace }}/thirdparty/firmware"
-          cp -rf ${PARTY3RD_PATH}/* firmware/
+          MODULES_PATH="${{ github.workspace }}/modules/firmware"
+          cp -rf ${MODULES_PATH}/* firmware/
 
           echo "extract all modules"
           for F in ./modules/*.tgz; do mkdir "${F%.tgz}" && tar -xzf "${F}" -C "${F%.tgz}"; done
@@ -168,7 +168,7 @@ jobs:
               mkdir -p "`dirname firmware/${L}`"
               cp "${SOURCE}/${L}" "firmware/${L}"
             else
-              [ -e "firmware/${L}" ] && echo "Used thirdparty ${L}" || echo "Missing ${L}"
+              [ -e "firmware/${L}" ] && echo "Used modules ${L}" || echo "Missing ${L}"
             fi
           done < <(find ./modules -name \*.ko -exec sh -c '/sbin/modinfo {} | grep ^firmware' \; | awk '{print $2}')
 
