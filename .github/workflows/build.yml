@@ -43,8 +43,8 @@ jobs:
             platform: broadwellnkv2
           - version: 7.1
             platform: denverton
-          #- version: 7.1
-          #  platform: epyc7002
+          - version: 7.1
+            platform: epyc7002
           - version: 7.1 
             platform: geminilake
           - version: 7.1 
@@ -147,23 +147,15 @@ jobs:
           fi
 
           PARTY3RD_PATH="${{ github.workspace }}/thirdparty/${{ matrix.platform }}-${{ env.KVER }}"
-          
+
           echo "copy 3rd modules"
           [ -d "${PARTY3RD_PATH}" ] && cp -Rvf "${PARTY3RD_PATH}/." "${{ github.workspace }}/source/output"
-          
-          echo "check depends"
-          for M in `ls ${{ github.workspace }}/source/output`; do
-            depends=(`modinfo "${{ github.workspace }}/source/output/${M}" | grep depends: | awk -F: '{print $2}' | awk '$1=$1' | sed 's/,/ /g'`)
-            if [ ${#depends[*]} -gt 0 ]; then
-              for k in ${depends[@]}; do
-                if [ ! -f "${{ github.workspace }}/source/output/${k}.ko" ]; then
-                  [ -f "${OFFICIAL_PATH}/${k}.ko" ] && FLAG=O || FLAG=X
-                  echo "[W][${FLAG}] '${{ matrix.platform }}-${{ env.KVER }}' - '${M}' depends '${k}' does not exist."
-                fi
-              done
-            fi
-          done
-          tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
+
+          if [ "${{ matrix.platform }}" = "epyc7002" ]; then
+            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.version }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
+          else
+            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ env.KVER }}.tgz -C ${{ github.workspace }}/source/output .
+          fi
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
