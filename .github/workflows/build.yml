@@ -35,65 +35,65 @@ jobs:
         include:
           - version: 7.1 
             platform: apollolake
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1
             platform: broadwell
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1 
             platform: broadwellnk
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1 
             platform: broadwellnkv2
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1
             platform: denverton
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1
             platform: epyc7002
-            kver: "5.10.55"
+            parm: "5.10.55"
           - version: 7.1 
             platform: geminilake
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1 
             platform: purley
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1
             platform: r1000
-            kver: "4.4.180"
+            parm: "4.4.180"
           - version: 7.1
             platform: v1000
-            kver: "4.4.180"
+            parm: "4.4.180"
 
           - version: 7.2 
             platform: apollolake
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2
             platform: broadwell
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2 
             platform: broadwellnk
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2 
             platform: broadwellnkv2
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2
             platform: denverton
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2
             platform: epyc7002
-            kver: "5.10.55"
+            parm: "5.10.55"
           - version: 7.2 
             platform: geminilake
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2 
             platform: purley
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2
             platform: r1000
-            kver: "4.4.302"
+            parm: "4.4.302"
           - version: 7.2
             platform: v1000
-            kver: "4.4.302"
+            parm: "4.4.302"
 
     runs-on: ubuntu-latest
 
@@ -115,18 +115,18 @@ jobs:
           fi
 
           if [ "${{ matrix.platform }}" = "epyc7002" ]; then
-            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.version }}"-${{ matrix.kver }}"
+            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.version }}"-${{ matrix.parm }}"
           else
-            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.kver }}"
+            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.parm }}"
           fi
 
           echo "copy 3rd modules"
           [ -d "${MODULES_PATH}" ] && cp -Rvf "${MODULES_PATH}/." "${{ github.workspace }}/source/output"
 
           if [ "${{ matrix.platform }}" = "epyc7002" ]; then
-            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.version }}-${{ matrix.kver }}.tgz -C ${{ github.workspace }}/source/output .
+            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.version }}-${{ matrix.parm }}.tgz -C ${{ github.workspace }}/source/output .
           else
-            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.kver }}.tgz -C ${{ github.workspace }}/source/output .
+            tar caf ${{ github.workspace }}/source/${{ matrix.platform }}-${{ matrix.parm }}.tgz -C ${{ github.workspace }}/source/output .
           fi
 
       - name: Upload to Artifacts
