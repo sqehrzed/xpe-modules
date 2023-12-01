@@ -115,7 +115,7 @@ jobs:
           fi
 
           if [ "${{ matrix.platform }}" = "epyc7002" ]; then
-            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.version }}"-${{ matrix.parm }}"
+            MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.version }}-${{ matrix.parm }}"
           else
             MODULES_PATH="${{ github.workspace }}/modules/${{ matrix.platform }}-${{ matrix.parm }}"
           fi
