@@ -241,6 +241,7 @@ jobs:
         if: env.VERSION != ''
         with:
           tag_name: ${{ env.VERSION }}
+          prerelease: ${{ inputs.prerelease }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
           files: |
