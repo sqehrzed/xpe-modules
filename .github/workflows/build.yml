@@ -63,6 +63,9 @@ jobs:
           - version: 7.1
             platform: v1000
             parm: "4.4.180"
+          - version: 7.1
+            platform: kvmx64
+            parm: "4.4.180"
 
           - version: 7.2 
             platform: apollolake
@@ -93,6 +96,9 @@ jobs:
             parm: "4.4.302"
           - version: 7.2
             platform: v1000
+            parm: "4.4.302"
+          - version: 7.2
+            platform: kvmx64
             parm: "4.4.302"
 
     runs-on: ubuntu-latest
@@ -241,6 +247,7 @@ jobs:
         if: env.VERSION != ''
         with:
           tag_name: ${{ env.VERSION }}
+          prerelease: ${{ inputs.prerelease }}
           body: |
             ${{ steps.Changelog.outputs.changelog }}
           files: |
